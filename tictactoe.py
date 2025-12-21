@@ -62,7 +62,7 @@ class TicTacToe:
         self.bg_top = (18, 24, 38)    # deep navy
         self.bg_bottom = (36, 50, 77)  # blue gradient
         self.line_color = (220, 220, 230)
-        self.x_color = (239, 71, 111)  # coral
+        self.x_color = (255, 105, 180)  # pink
         self.o_color = (129, 236, 236)  # mint
 
         pygame.font.init()
@@ -81,12 +81,23 @@ class TicTacToe:
         self.winner = 0
 
     def draw_background(self):
-        # draw gradient background
-        draw_gradient(self.screen, self.bg_top, self.bg_bottom)
-        # subtle vignette
-        vignette = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-        pygame.draw.circle(vignette, (0, 0, 0, 100), (self.size // 2, self.size // 2), self.size // 1.8)
-        self.screen.blit(vignette, (0, 0), special_flags=pygame.BLEND_RGBA_SUB)
+        # load and draw Chrysanthemum.jpg as background
+        try:
+            base = os.path.dirname(__file__) or os.getcwd()
+            bg_path = os.path.join(base, "static", "Chrysanthemum.jpg")
+            if not os.path.isfile(bg_path):
+                # fallback to cwd/static/Chrysanthemum.jpg
+                bg_path = os.path.join(os.getcwd(), "static", "Chrysanthemum.jpg")
+            if os.path.isfile(bg_path):
+                bg_surf = pygame.image.load(bg_path).convert()
+                bg_surf = pygame.transform.scale(bg_surf, (self.size, self.size))
+                self.screen.blit(bg_surf, (0, 0))
+            else:
+                # fallback to gradient if image not found
+                draw_gradient(self.screen, self.bg_top, self.bg_bottom)
+        except Exception:
+            # fallback to gradient on load error
+            draw_gradient(self.screen, self.bg_top, self.bg_bottom)
 
     def draw_ui(self):
         # Title (centered)
