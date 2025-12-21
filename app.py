@@ -22,7 +22,8 @@ HTML_TEMPLATE = """
       background-size: cover;
       background-repeat: no-repeat;
       background-color: rgba(0,0,0,0.25);
-      background-blend-mode: overlay;
+      background-blegit --version
+gitnd-mode: overlay;
       color: #111827;
       display: flex;
       align-items: center;
@@ -44,6 +45,7 @@ HTML_TEMPLATE = """
       <label>Game</label>
       <select name="game" required>
         <option value="tictactoe" {% if submitted and game=='tictactoe' %}selected{% endif %}>Tic Tac Toe</option>
+        <option value="snake" {% if submitted and game=='snake' %}selected{% endif %}>Snake</option>
       </select>
 
       <label>Your name</label>
@@ -129,7 +131,13 @@ def index():
         name = request.form.get("name", "")
         age = request.form.get("age", "")
         country = request.form.get("country", "")
-        game_label = "Tic Tac Toe" if game == "tictactoe" else game
+        if game == "tictactoe":
+            game_label = "Tic Tac Toe"
+        elif game == "snake":
+            game_label = "Snake"
+        else:
+            game_label = game
+
         return render_template_string(HTML_TEMPLATE,
                                       submitted=True,
                                       name=name,
@@ -137,6 +145,7 @@ def index():
                                       country=country,
                                       game=game,
                                       game_label=game_label)
+
     return render_template_string(HTML_TEMPLATE, submitted=False, name='', age='', country='', game='tictactoe')
 
 @app.route("/launch", methods=["POST"])
@@ -151,11 +160,15 @@ def launch():
     age = data.get("age", "")
     country = data.get("country", "")
 
-    # only allow the TicTacToe script for now
-    if game != "tictactoe":
-        return jsonify({"ok": False, "error": "unsupported game"}), 400
+    # allow specific scripts (map logical name -> filename)
+    allowed = {
+      "tictactoe": "tictactoe.py",
+      "snake": "snake.py",
+    }
+    if game not in allowed:
+      return jsonify({"ok": False, "error": "unsupported game"}), 400
 
-    script_path = os.path.join(app.root_path, "tictactoe.py")
+    script_path = os.path.join(app.root_path, allowed[game])
     if not os.path.isfile(script_path):
         return jsonify({"ok": False, "error": f"script not found: {script_path}"}), 404
 
@@ -166,10 +179,12 @@ def launch():
         # On Windows open in new console window
         popen_kwargs = {"cwd": app.root_path, "stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL}
         if os.name == "nt":
-            popen_kwargs["creationflags"] = 0x00000010  # CREATE_NEW_CONSOLE
+          # Hide the console window on Windows when launching GUI games
+          # CREATE_NO_WINDOW = 0x08000000
+          popen_kwargs["creationflags"] = 0x08000000
         else:
-            # recommended for POSIX when launching detached processes
-            popen_kwargs["close_fds"] = True
+          # recommended for POSIX when launching detached processes
+          popen_kwargs["close_fds"] = True
 
         subprocess.Popen(args, **popen_kwargs)
         return jsonify({"ok": True})

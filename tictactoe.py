@@ -43,10 +43,8 @@ class TicTacToe:
             pass
 
         # set caption after icon (keeps title consistent)
-        title = "Tic Tac Toe"
-        if player_name:
-            title = f"{title} - {player_name}"
-        pygame.display.set_caption(title)
+        # always show only the game title in the window caption
+        pygame.display.set_caption("Tic Tac Toe")
 
         # remaining initialization
         self.clock = pygame.time.Clock()
@@ -105,18 +103,7 @@ class TicTacToe:
         title_x = (self.size - title_surf.get_width()) // 2
         self.screen.blit(title_surf, (title_x, 10))
 
-        # show optional player info under title
-        if self.player_name or self.country or self.age:
-            info_text = ""
-            if self.player_name:
-                info_text += f"{self.player_name}"
-            if self.age:
-                info_text += f" • {self.age}"
-            if self.country:
-                info_text += f" • {self.country}"
-            info_surf = self.info_font.render(info_text, True, (200, 200, 210))
-            info_x = (self.size - info_surf.get_width()) // 2
-            self.screen.blit(info_surf, (info_x, 54))
+        # (player name / age / country intentionally not displayed)
 
         # Info line bottom-left
         info = 'Click to place. R to reset. Esc to quit.'
