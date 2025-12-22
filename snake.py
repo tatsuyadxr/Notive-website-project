@@ -7,6 +7,7 @@ import pygame
 import random
 from enum import Enum
 from collections import deque
+import os
 
 # Initialize Pygame
 pygame.init()
@@ -34,6 +35,44 @@ GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 
+
+def load_icon_or_create():
+    """Try to load static/snake.png; if missing try to run generator; otherwise return a fallback Surface."""
+    base = os.path.dirname(__file__) or os.getcwd()
+    icon_path = os.path.join(base, "static", "snake.png")
+    if not os.path.isfile(icon_path):
+        icon_path = os.path.join(os.getcwd(), "static", "snake.png")
+
+    # Try loading existing file
+    try:
+        if os.path.isfile(icon_path):
+            icon_surf = pygame.image.load(icon_path).convert_alpha()
+            return pygame.transform.smoothscale(icon_surf, (32, 32))
+    except Exception:
+        pass
+
+    # Try to generate the placeholder using the bundled generator script
+    try:
+        import generate_snake_png
+        try:
+            generate_snake_png.main()
+            if os.path.isfile(icon_path):
+                icon_surf = pygame.image.load(icon_path).convert_alpha()
+                return pygame.transform.smoothscale(icon_surf, (32, 32))
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    # Fallback: create a simple programmatic icon (green circle)
+    surf = pygame.Surface((32, 32), pygame.SRCALPHA)
+    surf.fill((0, 0, 0, 0))
+    try:
+        pygame.draw.circle(surf, GREEN, (16, 16), 14)
+    except Exception:
+        surf.fill(GREEN)
+    return surf
+
 class Direction(Enum):
     UP = (0, -1)
     DOWN = (0, 1)
@@ -44,6 +83,12 @@ class SnakeGame:
     def __init__(self, ai_mode=False):
         self.display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Snake Game - AI Mode: {}".format("ON" if ai_mode else "OFF"))
+        # Try to set a custom window icon (load/generate/fallback)
+        try:
+            icon_surf = load_icon_or_create()
+            pygame.display.set_icon(icon_surf)
+        except Exception:
+            pass
         self.clock = pygame.time.Clock()
         self.ai_mode = ai_mode
         
@@ -263,6 +308,12 @@ def select_mode_ui():
     # Create a temporary window for menu (use MENU_WIDTH/HEIGHT so menu size differs)
     screen = pygame.display.set_mode((MENU_WIDTH, MENU_HEIGHT))
     pygame.display.set_caption("2D Snake Games - Select Mode")
+    # Try to set the same icon as the game window (load/generate/fallback)
+    try:
+        icon_surf = load_icon_or_create()
+        pygame.display.set_icon(icon_surf)
+    except Exception:
+        pass
 
     font = pygame.font.Font(None, 48)
     small_font = pygame.font.Font(None, 32)
