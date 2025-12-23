@@ -46,6 +46,8 @@ gitnd-mode: overlay;
       <select name="game" required>
         <option value="tictactoe" {% if submitted and game=='tictactoe' %}selected{% endif %}>Tic Tac Toe</option>
         <option value="snake" {% if submitted and game=='snake' %}selected{% endif %}>Snake</option>
+        <option value="basic_calculator" {% if submitted and game=='basic_calculator' %}selected{% endif %}>Basic Calculator</option>
+        <option value="scientific_calculator" {% if submitted and game=='scientific_calculator' %}selected{% endif %}>Scientific Calculator</option>
       </select>
 
       <label>Your name</label>
@@ -71,7 +73,9 @@ gitnd-mode: overlay;
 
         <!-- show selected game in a visible textbox (readonly) so you can confirm/edit before launch -->
         <label style="margin-top:8px;color:#fff">Selected game</label>
-        <input id="payload_game" type="text" value="{{ game }}" readonly>
+        <input id="payload_game" type="text" value="{{ game_label }}" readonly>
+        <!-- hidden input keeps the actual game key (used when launching) -->
+        <input type="hidden" id="payload_game_key" value="{{ game }}">
 
         <!-- keep the other values in visible (or hidden) inputs so JS can send them reliably -->
         <input type="hidden" id="payload_name" value="{{ name|e }}">
@@ -88,6 +92,7 @@ gitnd-mode: overlay;
       try{
         // read values from the inputs (present only when submitted)
         const gameEl = document.getElementById('payload_game');
+        const gameKeyEl = document.getElementById('payload_game_key');
         const nameEl = document.getElementById('payload_name');
         const ageEl = document.getElementById('payload_age');
         const countryEl = document.getElementById('payload_country');
@@ -98,7 +103,8 @@ gitnd-mode: overlay;
         }
 
         const payload = {
-          game: gameEl.value || 'tictactoe',
+          // use the hidden key for launching the correct script
+          game: (gameKeyEl && gameKeyEl.value) ? gameKeyEl.value : (gameEl.value || 'tictactoe'),
           name: nameEl ? nameEl.value : '',
           age: ageEl ? ageEl.value : '',
           country: countryEl ? countryEl.value : ''
@@ -111,7 +117,8 @@ gitnd-mode: overlay;
         });
         const body = await res.json();
         if(body.ok){
-          alert(payload.game + ' launched (check your desktop).');
+          const label = gameEl ? gameEl.value : payload.game;
+          alert(label + ' launched (check your desktop).');
         } else {
           alert('Launch failed: ' + (body.error || 'unknown'));
         }
@@ -132,11 +139,15 @@ def index():
         age = request.form.get("age", "")
         country = request.form.get("country", "")
         if game == "tictactoe":
-            game_label = "Tic Tac Toe"
+          game_label = "Tic Tac Toe"
         elif game == "snake":
-            game_label = "Snake"
+          game_label = "Snake"
+        elif game == "basic_calculator":
+          game_label = "Basic Calculator"
+        elif game == "scientific_calculator":
+          game_label = "Scientific Calculator"
         else:
-            game_label = game
+          game_label = game
 
         return render_template_string(HTML_TEMPLATE,
                                       submitted=True,
@@ -164,6 +175,8 @@ def launch():
     allowed = {
       "tictactoe": "tictactoe.py",
       "snake": "snake.py",
+      "basic_calculator": "calculator.py",
+      "scientific_calculator": "calculator_scientific.py",
     }
     if game not in allowed:
       return jsonify({"ok": False, "error": "unsupported game"}), 400
