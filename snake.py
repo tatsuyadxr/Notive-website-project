@@ -37,11 +37,11 @@ BLUE = (0, 0, 255)
 
 
 def load_icon_or_create():
-    """Try to load static/snake.png; if missing try to run generator; otherwise return a fallback Surface."""
+    """Try to load static/snake3d.jpeg; if missing try to run generator; otherwise return a fallback Surface."""
     base = os.path.dirname(__file__) or os.getcwd()
-    icon_path = os.path.join(base, "static", "snake.png")
+    icon_path = os.path.join(base, "static", "snake3d.jpeg")
     if not os.path.isfile(icon_path):
-        icon_path = os.path.join(os.getcwd(), "static", "snake.png")
+        icon_path = os.path.join(os.getcwd(), "static", "snake3d.jpeg")
 
     # Try loading existing file
     try:
