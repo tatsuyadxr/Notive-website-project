@@ -22,10 +22,10 @@ class BasicCalculator(tk.Tk):
         self.geometry("720x420")
         self.resizable(False, False)
 
-        # modern vibrant palette
+        
         self.bg = "#0b1020"
         self.panel = "#071021"
-        self.accent = "#ff2d95"   # vibrant pink
+        self.accent = "#ff2d95"   
         self.fg = "#f8fafc"
         self.btn_bg = "#0b1220"
 

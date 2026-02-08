@@ -179,7 +179,6 @@ class TicTacToe:
         # tie
         if all(self.board[r][c] for r in range(3) for c in range(3)):
             self.winner = 3
-
     def handle_click(self, pos):
         if self.winner:
             return
