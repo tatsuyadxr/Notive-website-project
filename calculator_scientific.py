@@ -3,6 +3,7 @@ import math
 import tkinter as tk
 from tkinter import ttk
 import threading
+import os
 
 
 def safe_eval_scientific(expression):
@@ -23,6 +24,18 @@ class ScientificCalculator(tk.Tk):
         self.title(title)
         self.geometry("920x520")
         self.resizable(False, False)
+
+        # load icon from static folder
+        try:
+            base = os.path.dirname(__file__) or os.getcwd()
+            icon_path = os.path.join(base, "static", "icon.png")
+            if not os.path.isfile(icon_path):
+                icon_path = os.path.join(os.getcwd(), "static", "icon.png")
+            if os.path.isfile(icon_path):
+                icon_surf = tk.PhotoImage(file=icon_path)
+                self.iconphoto(False, icon_surf)
+        except Exception:
+            pass
 
         # theme (vibrant)
         self.bg = "#0b1020"

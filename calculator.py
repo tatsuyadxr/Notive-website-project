@@ -2,6 +2,7 @@ import sys
 import tkinter as tk
 from tkinter import ttk
 import threading
+import os
 
 
 def safe_eval(expression, extra_names=None):
@@ -21,6 +22,18 @@ class BasicCalculator(tk.Tk):
         self.title(title)
         self.geometry("720x420")
         self.resizable(False, False)
+
+        # load icon from static folder
+        try:
+            base = os.path.dirname(__file__) or os.getcwd()
+            icon_path = os.path.join(base, "static", "icon.png")
+            if not os.path.isfile(icon_path):
+                icon_path = os.path.join(os.getcwd(), "static", "icon.png")
+            if os.path.isfile(icon_path):
+                icon_surf = tk.PhotoImage(file=icon_path)
+                self.iconphoto(False, icon_surf)
+        except Exception:
+            pass
 
         
         self.bg = "#0b1020"
