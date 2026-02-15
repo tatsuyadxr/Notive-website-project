@@ -131,16 +131,67 @@ def create_multiple_planets():
 
 
 if __name__ == '__main__':
-    # Create individual planet
-    print("Creating Earth...")
-    fig_earth, ax_earth = create_planet_3d('earth', rotation=45, save_fig=False)
-    
-    # Create Mars
-    print("Creating Mars...")
-    fig_mars, ax_mars = create_planet_3d('mars', rotation=90, save_fig=False)
-    
-    # Create multiple planets in one figure
-    print("Creating multiple planets...")
-    fig_multi = create_multiple_planets()
-    
-    plt.show()
+    import argparse
+    import os
+    import sys
+
+    parser = argparse.ArgumentParser(description='planet3d CLI - generate planet visuals')
+    parser.add_argument('--planet', choices=['earth', 'mars', 'jupiter', 'venus', 'moon'], default='earth', help='which planet to render')
+    parser.add_argument('--rotation', type=float, default=0.0, help='rotation in degrees')
+    parser.add_argument('--out-file', help='path to save the generated image (e.g. static/myplanet.png)')
+    parser.add_argument('--multiple', action='store_true', help='create multiple-planets grid')
+    parser.add_argument('--show', action='store_true', help='display the figure interactively')
+    parser.add_argument('name', nargs='?', help='optional context name')
+    parser.add_argument('age', nargs='?', help='optional context age')
+    parser.add_argument('country', nargs='?', help='optional context country')
+
+    # detect whether the script was started with any command-line args
+    had_args = len(sys.argv) > 1
+    args = parser.parse_args()
+
+    # If no CLI arguments were provided, run an interactive demo by default
+    if not had_args:
+        fig, ax = create_planet_3d(planet_type=args.planet, rotation=args.rotation, save_fig=False)
+        try:
+            plt.show()
+        except Exception:
+            # running headless or non-interactive backend — fall back to saving a file
+            outp = os.path.join('static', f"{args.planet}_3d.png")
+            os.makedirs(os.path.dirname(outp), exist_ok=True)
+            fig.savefig(outp, dpi=150, bbox_inches='tight')
+            print(outp)
+        sys.exit(0)
+
+    # Multiple-planet mode
+    if args.multiple:
+        fig = create_multiple_planets()
+        if args.out_file:
+            outp = args.out_file
+            d = os.path.dirname(outp)
+            if d:
+                os.makedirs(d, exist_ok=True)
+            fig.savefig(outp, dpi=150, bbox_inches='tight')
+            print(outp)
+            sys.exit(0)
+        if args.show:
+            plt.show()
+        else:
+            print('Created multiple-planet figure (not saved).')
+        sys.exit(0)
+
+    # Single-planet mode
+    fig, ax = create_planet_3d(planet_type=args.planet, rotation=args.rotation, save_fig=False)
+    if args.out_file:
+        outp = args.out_file
+        d = os.path.dirname(outp)
+        if d:
+            os.makedirs(d, exist_ok=True)
+        fig.savefig(outp, dpi=150, bbox_inches='tight')
+        print(outp)
+        sys.exit(0)
+
+    if args.show:
+        plt.show()
+    else:
+        print('Created planet figure (not saved).')
+
